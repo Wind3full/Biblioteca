@@ -1,5 +1,5 @@
 node_modules/
-library.db
+library.db*
 library.db-wal
 library.db-shm
 .env
