@@ -1,0 +1,21 @@
+{
+  "name": "biblioteca",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema de gestión de biblioteca para centro educativo",
+  "main": "server.js",
+  "engines": {
+    "node": "^20.0.0 || >=22.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "db:init": "node db/init.js",
+    "db:seed": "node db/seed.js",
+    "db:reset": "node db/reset.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "express": "^4.21.2"
+  }
+}
