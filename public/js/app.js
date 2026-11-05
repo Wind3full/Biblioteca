@@ -1,33 +1,45 @@
-// Endpoint base de la API REST
-const API_URL = 'http://localhost:3000/api';
+// Endpoint base de la API REST (mismo origen que sirve el frontend)
+const API_URL = '/api';
+
+/**
+ * Wrapper de fetch: envía/recibe JSON y lanza Error con el mensaje { error } del backend
+ */
+async function api(path, options = {}) {
+    const res = await fetch(`${API_URL}${path}`, {
+        ...options,
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        body: options.body !== undefined ? JSON.stringify(options.body) : undefined
+    });
+    if (res.status === 204) return null;
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((data && data.error) || `Error HTTP ${res.status}`);
+    return data;
+}
+
+function showError(err) {
+    console.error(err);
+    alert(err.message || 'Error inesperado');
+}
 
 /**
  * Función principal para obtener y renderizar todos los datos de la biblioteca
  */
 async function fetchData() {
-    try {
-        await Promise.all([
-            fetchBooks(),
-            fetchUsers(),
-            fetchLoans()
-        ]);
-    } catch (error) {
-        console.error("Error al sincronizar con el backend:", error);
-    }
+    await Promise.all([fetchBooks(), fetchUsers(), fetchLoans()]);
 }
 
 /**
- * Obtener y renderizar la lista de Libros
+ * Libros: GET /api/libros?estado=activo
+ * Campos: id, titulo, autor, ejemplares_total, ejemplares_disponibles, ejemplares_prestados...
  */
 async function fetchBooks() {
     try {
-        const res = await fetch(`${API_URL}/books`);
-        const books = await res.json();
-        
+        const books = await api('/libros?estado=activo');
+
         const bookList = document.getElementById('book-list');
         const loanBookSelect = document.getElementById('loan-book');
         const bookCountBadge = document.getElementById('book-count-badge');
-        
+
         bookList.innerHTML = '';
         loanBookSelect.innerHTML = '<option value="">Seleccione Libro</option>';
         bookCountBadge.textContent = books.length;
@@ -38,50 +50,51 @@ async function fetchBooks() {
         }
 
         books.forEach(book => {
-            const stockBadgeColor = book.stock > 0 
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+            const disp = book.ejemplares_disponibles;
+            const stockBadgeColor = disp > 0
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                 : 'bg-rose-50 text-rose-700 border-rose-200';
-            
+
             bookList.innerHTML += `
                 <li class="py-3 flex justify-between items-center px-2 rounded-md">
                     <div class="pr-2">
-                        <p class="font-medium text-slate-800 line-clamp-1">${escapeHtml(book.title)}</p>
-                        <p class="text-xs text-slate-500">${escapeHtml(book.author)}</p>
+                        <p class="font-medium text-slate-800 line-clamp-1">${escapeHtml(book.titulo)}</p>
+                        <p class="text-xs text-slate-500">${escapeHtml(book.autor)}</p>
                     </div>
                     <div class="flex items-center space-x-2">
                         <span class="text-xs font-semibold px-2 py-0.5 rounded border ${stockBadgeColor}">
-                            Stock: ${book.stock}
+                            Disp: ${disp}/${book.ejemplares_total}
                         </span>
-                        <button onclick="deleteBook(${book.id})" title="Eliminar libro" class="text-slate-400 hover:text-rose-600 transition p-1">
+                        <button onclick="deleteBook(${book.id})" title="Dar de baja" class="text-slate-400 hover:text-rose-600 transition p-1">
                             🗑️
                         </button>
                     </div>
                 </li>
             `;
 
-            if (book.stock > 0) {
+            if (disp > 0) {
                 loanBookSelect.innerHTML += `
-                    <option value="${book.id}">${escapeHtml(book.title)} (Disp: ${book.stock})</option>
+                    <option value="${book.id}">${escapeHtml(book.titulo)} (Disp: ${disp})</option>
                 `;
             }
         });
     } catch (err) {
-        console.error("Error al obtener libros:", err);
+        console.error('Error al obtener libros:', err);
     }
 }
 
 /**
- * Obtener y renderizar la lista de Usuarios
+ * Usuarios: GET /api/usuarios?estado_membresia=activa
+ * Campos: id, nombre, apellidos, email, rol, estado_membresia, prestamos_activos
  */
 async function fetchUsers() {
     try {
-        const res = await fetch(`${API_URL}/users`);
-        const users = await res.json();
-        
+        const users = await api('/usuarios?estado_membresia=activa');
+
         const userList = document.getElementById('user-list');
         const loanUserSelect = document.getElementById('loan-user');
         const userCountBadge = document.getElementById('user-count-badge');
-        
+
         userList.innerHTML = '';
         loanUserSelect.innerHTML = '<option value="">Seleccione Usuario</option>';
         userCountBadge.textContent = users.length;
@@ -92,38 +105,39 @@ async function fetchUsers() {
         }
 
         users.forEach(user => {
+            const fullName = `${user.nombre} ${user.apellidos || ''}`.trim();
             userList.innerHTML += `
                 <li class="py-3 flex justify-between items-center px-2 rounded-md">
                     <div class="pr-2">
-                        <p class="font-medium text-slate-800">${escapeHtml(user.name)}</p>
-                        <p class="text-xs text-slate-500">${escapeHtml(user.email)}</p>
+                        <p class="font-medium text-slate-800">${escapeHtml(fullName)}</p>
+                        <p class="text-xs text-slate-500">${escapeHtml(user.email)} · ${escapeHtml(user.rol)} · ${user.prestamos_activos} préstamo(s)</p>
                     </div>
-                    <button onclick="deleteUser(${user.id})" title="Eliminar usuario" class="text-slate-400 hover:text-rose-600 transition p-1">
+                    <button onclick="deleteUser(${user.id})" title="Dar de baja" class="text-slate-400 hover:text-rose-600 transition p-1">
                         🗑️
                     </button>
                 </li>
             `;
 
             loanUserSelect.innerHTML += `
-                <option value="${user.id}">${escapeHtml(user.name)}</option>
+                <option value="${user.id}">${escapeHtml(fullName)}</option>
             `;
         });
     } catch (err) {
-        console.error("Error al obtener usuarios:", err);
+        console.error('Error al obtener usuarios:', err);
     }
 }
 
 /**
- * Obtener y renderizar la lista de Préstamos Activos
+ * Préstamos activos: GET /api/prestamos?estado=activo
+ * Campos (vista_prestamos_detalle): id, libro, usuario, fecha_vencimiento, retrasado, dias_para_vencer...
  */
 async function fetchLoans() {
     try {
-        const res = await fetch(`${API_URL}/loans`);
-        const loans = await res.json();
-        
+        const loans = await api('/prestamos?estado=activo');
+
         const loanList = document.getElementById('loan-list');
         const loanCountBadge = document.getElementById('loan-count-badge');
-        
+
         loanList.innerHTML = '';
         loanCountBadge.textContent = loans.length;
 
@@ -133,13 +147,17 @@ async function fetchLoans() {
         }
 
         loans.forEach(loan => {
+            const vence = loan.retrasado
+                ? `<span class="text-rose-600 font-semibold">Vencido (${escapeHtml(loan.fecha_vencimiento)})</span>`
+                : `Vence: ${escapeHtml(loan.fecha_vencimiento)}`;
             loanList.innerHTML += `
                 <li class="py-3 flex justify-between items-center px-2 rounded-md">
                     <div class="pr-2">
-                        <p class="font-medium text-slate-800 line-clamp-1">📖 ${escapeHtml(loan.book_title || 'Libro ID: ' + loan.book_id)}</p>
-                        <p class="text-xs text-slate-500">👤 ${escapeHtml(loan.user_name || 'Usuario ID: ' + loan.user_id)}</p>
+                        <p class="font-medium text-slate-800 line-clamp-1">📖 ${escapeHtml(loan.libro)}</p>
+                        <p class="text-xs text-slate-500">👤 ${escapeHtml(loan.usuario)}</p>
+                        <p class="text-xs text-slate-500">${vence}</p>
                     </div>
-                    <button onclick="returnLoan(${loan.id})" 
+                    <button onclick="returnLoan(${loan.id})"
                             class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-semibold px-2.5 py-1 rounded transition shadow-sm flex items-center gap-1">
                         Devolver
                     </button>
@@ -147,97 +165,98 @@ async function fetchLoans() {
             `;
         });
     } catch (err) {
-        console.error("Error al obtener préstamos:", err);
+        console.error('Error al obtener préstamos:', err);
     }
 }
 
 // --- Manejadores de Formularios ---
 
+// POST /api/libros { titulo, autor, ejemplares_total }
 document.getElementById('book-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const title = document.getElementById('book-title').value.trim();
-    const author = document.getElementById('book-author').value.trim();
-    const stock = parseInt(document.getElementById('book-stock').value);
+    const titulo = document.getElementById('book-title').value.trim();
+    const autor = document.getElementById('book-author').value.trim();
+    const ejemplares_total = parseInt(document.getElementById('book-stock').value, 10);
 
-    if (!title || !author || isNaN(stock)) return;
+    if (!titulo || !autor || isNaN(ejemplares_total)) return;
 
-    await fetch(`${API_URL}/books`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, author, stock })
-    });
-
-    e.target.reset();
-    fetchData();
+    try {
+        await api('/libros', { method: 'POST', body: { titulo, autor, ejemplares_total } });
+        e.target.reset();
+        fetchData();
+    } catch (err) { showError(err); }
 });
 
+// POST /api/usuarios { nombre, email }
 document.getElementById('user-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const name = document.getElementById('user-name').value.trim();
+    const nombre = document.getElementById('user-name').value.trim();
     const email = document.getElementById('user-email').value.trim();
 
-    if (!name || !email) return;
+    if (!nombre || !email) return;
 
-    await fetch(`${API_URL}/users`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email })
-    });
-
-    e.target.reset();
-    fetchData();
+    try {
+        await api('/usuarios', { method: 'POST', body: { nombre, email } });
+        e.target.reset();
+        fetchData();
+    } catch (err) { showError(err); }
 });
 
+// POST /api/prestamos { usuario_id, libro_id }
 document.getElementById('loan-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const userId = parseInt(document.getElementById('loan-user').value);
-    const bookId = parseInt(document.getElementById('loan-book').value);
+    const usuario_id = parseInt(document.getElementById('loan-user').value, 10);
+    const libro_id = parseInt(document.getElementById('loan-book').value, 10);
 
-    if (!userId || !bookId) return;
+    if (!usuario_id || !libro_id) return;
 
-    await fetch(`${API_URL}/loans`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, book_id: bookId })
-    });
-
-    e.target.reset();
-    fetchData();
+    try {
+        await api('/prestamos', { method: 'POST', body: { usuario_id, libro_id } });
+        e.target.reset();
+        fetchData();
+    } catch (err) { showError(err); }
 });
 
 /**
- * Acciones de Devolución y Eliminación
+ * Acciones de Devolución y Baja
  */
+// POST /api/prestamos/:id/devolver
 async function returnLoan(id) {
-    await fetch(`${API_URL}/loans/${id}`, { method: 'DELETE' });
-    fetchData();
+    try {
+        await api(`/prestamos/${id}/devolver`, { method: 'POST', body: {} });
+        fetchData();
+    } catch (err) { showError(err); }
 }
 
+// DELETE /api/libros/:id  (baja lógica: estado = 'baja')
 async function deleteBook(id) {
-    if (confirm('¿Deseas eliminar este libro del catálogo?')) {
-        await fetch(`${API_URL}/books/${id}`, { method: 'DELETE' });
+    if (!confirm('¿Deseas dar de baja este libro del catálogo?')) return;
+    try {
+        await api(`/libros/${id}`, { method: 'DELETE' });
         fetchData();
-    }
+    } catch (err) { showError(err); }
 }
 
+// DELETE /api/usuarios/:id  (baja lógica: estado_membresia = 'inactiva')
 async function deleteUser(id) {
-    if (confirm('¿Deseas eliminar este usuario?')) {
-        await fetch(`${API_URL}/users/${id}`, { method: 'DELETE' });
+    if (!confirm('¿Deseas dar de baja este usuario?')) return;
+    try {
+        await api(`/usuarios/${id}`, { method: 'DELETE' });
         fetchData();
-    }
+    } catch (err) { showError(err); }
 }
 
 /**
  * Función auxiliar para evitar vulnerabilidades XSS
  */
 function escapeHtml(text) {
-    if (!text) return '';
+    if (text === null || text === undefined) return '';
     return String(text)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
 // Inicializar datos al cargar la página
