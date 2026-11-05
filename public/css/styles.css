@@ -17,6 +17,11 @@
     background: #94a3b8;
 }
 
+/* Que el atributo hidden gane a utilidades como .flex de Tailwind */
+[hidden] {
+    display: none !important;
+}
+
 /* Transiciones de hover */
 #book-list li, #user-list li, #loan-list li {
     transition: background-color 0.15s ease-in-out;

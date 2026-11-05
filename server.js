@@ -63,9 +63,10 @@ app.put('/api/libros/:id', wrap((req, res) => {
   const d = pick(req.body, CAMPOS_LIBRO);
   if (d.ejemplares_total !== undefined) {
     d.ejemplares_total = Number(d.ejemplares_total);
-    // El trigger hace MAX(0, ...) y ocultaría el error: validamos aquí
     if (!Number.isInteger(d.ejemplares_total) || d.ejemplares_total < l.ejemplares_prestados)
       throw new HttpError(400, `ejemplares_total no puede ser menor que los prestados (${l.ejemplares_prestados})`);
+    // Disponibles = total - prestados, en la misma sentencia para que el CHECK no falle al reducir
+    d.ejemplares_disponibles = d.ejemplares_total - l.ejemplares_prestados;
   }
   const cols = Object.keys(d);
   if (!cols.length) throw new HttpError(400, 'Nada que actualizar');

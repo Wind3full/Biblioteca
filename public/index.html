@@ -47,16 +47,8 @@
                     <!-- Formulario Nuevo Libro -->
                     <form id="book-form" class="bg-slate-50 p-4 rounded-lg border border-slate-200/80 space-y-3">
                         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Añadir Nuevo Libro</h3>
-                        <div>
-                            <input type="text" id="book-title" placeholder="Título del libro" required 
-                                class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="book-author" placeholder="Autor" required 
-                                class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
-                            <input type="number" id="book-stock" placeholder="Stock" min="1" required 
-                                class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
-                        </div>
+                        <!-- Campos generados desde CAMPOS_EDICION.libros (app.js) -->
+                        <div id="book-form-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
                         <button type="submit" 
                                 class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md text-sm shadow-sm transition flex items-center justify-center gap-1">
                             <span>+</span> Guardar Libro
@@ -88,14 +80,8 @@
                     <!-- Formulario Nuevo Usuario -->
                     <form id="user-form" class="bg-slate-50 p-4 rounded-lg border border-slate-200/80 space-y-3">
                         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Registrar Usuario</h3>
-                        <div>
-                            <input type="text" id="user-name" placeholder="Nombre completo" required 
-                                class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition">
-                        </div>
-                        <div>
-                            <input type="email" id="user-email" placeholder="Correo electrónico" required 
-                                class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition">
-                        </div>
+                        <!-- Campos generados desde CAMPOS_EDICION.usuarios (app.js) -->
+                        <div id="user-form-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
                         <button type="submit" 
                                 class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-md text-sm shadow-sm transition flex items-center justify-center gap-1">
                             <span>+</span> Registrar Usuario
@@ -129,17 +115,17 @@
                         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Asignar Préstamo</h3>
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">Seleccionar Usuario</label>
-                            <select id="loan-user" required 
-                                    class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition">
-                                <option value="">Seleccione Usuario</option>
-                            </select>
+                            <input id="loan-user" list="loan-user-options" required autocomplete="off"
+                                   placeholder="Escriba nombre o email..."
+                                   class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition">
+                            <datalist id="loan-user-options"></datalist>
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">Seleccionar Libro (Stock > 0)</label>
-                            <select id="loan-book" required 
-                                    class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition">
-                                <option value="">Seleccione Libro</option>
-                            </select>
+                            <input id="loan-book" list="loan-book-options" required autocomplete="off"
+                                   placeholder="Escriba título o autor..."
+                                   class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition">
+                            <datalist id="loan-book-options"></datalist>
                         </div>
                         <button type="submit" 
                                 class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md text-sm shadow-sm transition flex items-center justify-center gap-1">
@@ -160,7 +146,60 @@
             </section>
 
         </div>
+
+        <!-- Historial de Préstamos y Devoluciones -->
+        <section class="mt-8 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-wrap gap-3 justify-between items-center">
+                <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <span>🗂️</span> Historial de Préstamos y Devoluciones
+                </h2>
+                <select id="history-filter"
+                        class="px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">Todos los estados</option>
+                    <option value="activo">Activos</option>
+                    <option value="devuelto">Devueltos</option>
+                    <option value="perdido">Perdidos</option>
+                    <option value="cancelado">Cancelados</option>
+                </select>
+            </div>
+            <div class="overflow-x-auto max-h-[420px] custom-scrollbar">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-slate-50 text-xs uppercase text-slate-500 sticky top-0">
+                        <tr>
+                            <th class="px-4 py-2">#</th>
+                            <th class="px-4 py-2">Libro</th>
+                            <th class="px-4 py-2">Usuario</th>
+                            <th class="px-4 py-2">Préstamo</th>
+                            <th class="px-4 py-2">Vencimiento</th>
+                            <th class="px-4 py-2">Devolución</th>
+                            <th class="px-4 py-2">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-list" class="divide-y divide-slate-100">
+                        <tr><td colspan="7" class="py-4 text-center text-slate-400 italic">Cargando historial...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </main>
+
+    <!-- Modal de edición (libros y usuarios) -->
+    <div id="edit-modal" class="fixed inset-0 z-[60] bg-slate-900/50 flex items-center justify-center p-4" hidden>
+        <form id="edit-form" class="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="p-5 border-b border-slate-100 flex justify-between items-center">
+                <h2 id="edit-title" class="text-lg font-semibold text-slate-800">Editar</h2>
+                <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
+            </div>
+            <div id="edit-fields" class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            <p id="edit-error" class="px-5 text-sm text-rose-600" hidden></p>
+            <div class="p-5 flex justify-end gap-2 border-t border-slate-100">
+                <button type="button" onclick="closeEditModal()"
+                        class="px-4 py-2 text-sm rounded-md border border-slate-300 hover:bg-slate-50">Cancelar</button>
+                <button type="submit"
+                        class="px-4 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-medium">Guardar cambios</button>
+            </div>
+        </form>
+    </div>
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-4 mt-auto">

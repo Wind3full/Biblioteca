@@ -199,21 +199,14 @@ BEGIN
 END;
 
 -- ------------------------------------------------------------
--- TRIGGERS: al cambiar ejemplares_total se ajusta la
--- disponibilidad con el mismo delta.
+-- Ajuste de disponibilidad al cambiar ejemplares_total:
+-- NO se hace con trigger. Un trigger AFTER llega tarde: el
+-- CHECK (ejemplares_disponibles <= ejemplares_total) se evalúa
+-- antes y rechaza cualquier reducción de ejemplares. La API
+-- actualiza ambas columnas en la misma sentencia UPDATE.
+-- (DROP para eliminarlo de bases de datos ya creadas)
 -- ------------------------------------------------------------
-CREATE TRIGGER IF NOT EXISTS trg_libros_ajustar_disponibles
-AFTER UPDATE OF ejemplares_total ON libros
-FOR EACH ROW
-WHEN NEW.ejemplares_total <> OLD.ejemplares_total
-BEGIN
-  UPDATE libros
-     SET ejemplares_disponibles = MAX(
-           0,
-           ejemplares_disponibles + (NEW.ejemplares_total - OLD.ejemplares_total)
-         )
-   WHERE id = NEW.id;
-END;
+DROP TRIGGER IF EXISTS trg_libros_ajustar_disponibles;
 
 -- ------------------------------------------------------------
 -- VISTAS
