@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Biblioteca Escolar</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+
+    <!-- Header Navigation -->
+    <header class="bg-indigo-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <span class="text-3xl">📚</span>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">Biblioteca Escolar</h1>
+                    <p class="text-xs text-indigo-200">Panel de Control & Gestión de Préstamos</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 bg-indigo-700/60 px-3 py-1.5 rounded-full text-xs font-medium border border-indigo-500/30">
+                <span class="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                <span>Sistema Activo</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+        <!-- Grid Layout for Modules -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Card 1: Gestión de Libros -->
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                        <span>📖</span> Catálogo de Libros
+                    </h2>
+                    <span id="book-count-badge" class="bg-indigo-100 text-indigo-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">0</span>
+                </div>
+                
+                <div class="p-5 flex-grow flex flex-col space-y-6">
+                    <!-- Formulario Nuevo Libro -->
+                    <form id="book-form" class="bg-slate-50 p-4 rounded-lg border border-slate-200/80 space-y-3">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Añadir Nuevo Libro</h3>
+                        <!-- Campos generados desde CAMPOS_EDICION.libros (app.js) -->
+                        <div id="book-form-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+                        <button type="submit" 
+                                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md text-sm shadow-sm transition flex items-center justify-center gap-1">
+                            <span>+</span> Guardar Libro
+                        </button>
+                    </form>
+
+                    <!-- Lista de Libros -->
+                    <div class="flex-grow flex flex-col">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Libros Registrados</h3>
+                        <div class="overflow-y-auto max-h-[360px] custom-scrollbar pr-1">
+                            <ul id="book-list" class="divide-y divide-slate-100 text-sm">
+                                <li class="py-4 text-center text-slate-400 italic">Cargando catálogo...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Card 2: Gestión de Usuarios -->
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                        <span>👤</span> Usuarios Escolares
+                    </h2>
+                    <span id="user-count-badge" class="bg-emerald-100 text-emerald-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">0</span>
+                </div>
+                
+                <div class="p-5 flex-grow flex flex-col space-y-6">
+                    <!-- Formulario Nuevo Usuario -->
+                    <form id="user-form" class="bg-slate-50 p-4 rounded-lg border border-slate-200/80 space-y-3">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Registrar Usuario</h3>
+                        <!-- Campos generados desde CAMPOS_EDICION.usuarios (app.js) -->
+                        <div id="user-form-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+                        <button type="submit" 
+                                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-md text-sm shadow-sm transition flex items-center justify-center gap-1">
+                            <span>+</span> Registrar Usuario
+                        </button>
+                    </form>
+
+                    <!-- Lista de Usuarios -->
+                    <div class="flex-grow flex flex-col">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Usuarios de la Biblioteca</h3>
+                        <div class="overflow-y-auto max-h-[360px] custom-scrollbar pr-1">
+                            <ul id="user-list" class="divide-y divide-slate-100 text-sm">
+                                <li class="py-4 text-center text-slate-400 italic">Cargando usuarios...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Card 3: Gestión de Préstamos -->
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                        <span>🔄</span> Préstamos & Devoluciones
+                    </h2>
+                    <span id="loan-count-badge" class="bg-purple-100 text-purple-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">0</span>
+                </div>
+                
+                <div class="p-5 flex-grow flex flex-col space-y-6">
+                    <!-- Formulario Nuevo Préstamo -->
+                    <form id="loan-form" class="bg-slate-50 p-4 rounded-lg border border-slate-200/80 space-y-3">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Asignar Préstamo</h3>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Seleccionar Usuario</label>
+                            <input id="loan-user" list="loan-user-options" required autocomplete="off"
+                                   placeholder="Escriba nombre o email..."
+                                   class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition">
+                            <datalist id="loan-user-options"></datalist>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Seleccionar Libro (Stock > 0)</label>
+                            <input id="loan-book" list="loan-book-options" required autocomplete="off"
+                                   placeholder="Escriba título o autor..."
+                                   class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition">
+                            <datalist id="loan-book-options"></datalist>
+                        </div>
+                        <button type="submit" 
+                                class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md text-sm shadow-sm transition flex items-center justify-center gap-1">
+                            <span>🔄</span> Registrar Préstamo
+                        </button>
+                    </form>
+
+                    <!-- Lista de Préstamos Activos -->
+                    <div class="flex-grow flex flex-col">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Préstamos en Curso</h3>
+                        <div class="overflow-y-auto max-h-[360px] custom-scrollbar pr-1">
+                            <ul id="loan-list" class="divide-y divide-slate-100 text-sm">
+                                <li class="py-4 text-center text-slate-400 italic">Cargando préstamos...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Historial de Préstamos y Devoluciones -->
+        <section class="mt-8 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-wrap gap-3 justify-between items-center">
+                <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <span>🗂️</span> Historial de Préstamos y Devoluciones
+                </h2>
+                <select id="history-filter"
+                        class="px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">Todos los estados</option>
+                    <option value="activo">Activos</option>
+                    <option value="devuelto">Devueltos</option>
+                    <option value="perdido">Perdidos</option>
+                    <option value="cancelado">Cancelados</option>
+                </select>
+            </div>
+            <div class="overflow-x-auto max-h-[420px] custom-scrollbar">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-slate-50 text-xs uppercase text-slate-500 sticky top-0">
+                        <tr>
+                            <th class="px-4 py-2">#</th>
+                            <th class="px-4 py-2">Libro</th>
+                            <th class="px-4 py-2">Usuario</th>
+                            <th class="px-4 py-2">Préstamo</th>
+                            <th class="px-4 py-2">Vencimiento</th>
+                            <th class="px-4 py-2">Devolución</th>
+                            <th class="px-4 py-2">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-list" class="divide-y divide-slate-100">
+                        <tr><td colspan="7" class="py-4 text-center text-slate-400 italic">Cargando historial...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal de edición (libros y usuarios) -->
+    <div id="edit-modal" class="fixed inset-0 z-[60] bg-slate-900/50 flex items-center justify-center p-4" hidden>
+        <form id="edit-form" class="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="p-5 border-b border-slate-100 flex justify-between items-center">
+                <h2 id="edit-title" class="text-lg font-semibold text-slate-800">Editar</h2>
+                <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
+            </div>
+            <div id="edit-fields" class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            <p id="edit-error" class="px-5 text-sm text-rose-600" hidden></p>
+            <div class="p-5 flex justify-end gap-2 border-t border-slate-100">
+                <button type="button" onclick="closeEditModal()"
+                        class="px-4 py-2 text-sm rounded-md border border-slate-300 hover:bg-slate-50">Cancelar</button>
+                <button type="submit"
+                        class="px-4 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-medium">Guardar cambios</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            Sistema de Gestión de Biblioteca Escolar &copy; 2026 — Interfaz de Usuario decoupled REST.
+        </div>
+    </footer>
+
+    <!-- Frontend Script -->
+    <script src="js/app.js"></script>
+</body>
+</html>

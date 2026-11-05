@@ -1,0 +1,32 @@
+/* Custom Scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Que el atributo hidden gane a utilidades como .flex de Tailwind */
+[hidden] {
+    display: none !important;
+}
+
+/* Transiciones de hover */
+#book-list li, #user-list li, #loan-list li {
+    transition: background-color 0.15s ease-in-out;
+}
+
+#book-list li:hover, #user-list li:hover, #loan-list li:hover {
+    background-color: #f8fafc;
+}
